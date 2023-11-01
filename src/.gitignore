@@ -1,0 +1,74 @@
+# .NET Core
+bin/
+obj/
+.vscode/
+.vs/
+_resharper/
+_ReSharper/
+.idea/
+
+# Visual Studio Code
+.vscode/
+
+# Rider
+.idea/
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# User-specific directories
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+[Ll]ogFiles/
+node_modules/
+[Bb][Ii][Nn]/
+[Dd][Ee][Bb][Uu][Gg]/
+[Ii][Nn][Tt][Ee][Rr][Mm][Ee][Dd][Ii][Aa][Tt][Ee]/
+[Ss][Ss][Cc][Cc]/
+[Cc][Aa][Cc][Hh][Ee]/
+[Tt][Ee][Mm][Pp]/
+[Tt][Ee][Mm][Pp][Dd][Bb]/
+[Tt][Ee][Mm][Pp][Ii][Nn][Dd][Ee][Xx]/
+[Pp][Rr][Ee][Vv][Ii][Ee][Ww][Ss]/
+[Pp][Uu][Bb][Ll][Ii][Cc]/
+
+# Visual Studio profiler
+*.psess
+*.vsp
+*.vspx
+
+# Tye
+.tye/
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# VS Code directories
+.vscode/
+
+# Visual Studio directory
+.vs/
+
+# Rider directory
+.idea/

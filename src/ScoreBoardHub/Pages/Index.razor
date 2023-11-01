@@ -1,0 +1,73 @@
+﻿@page "/"
+@using Azure.Data.Tables
+@using ScoreBoardHub.Services
+@inject TableService TableService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Scoreboards</PageTitle>
+<div class="content-wrapper">
+    <h2>Scoreboards</h2>
+</div>
+<div class="content-wrapper">
+    @if (loading)
+    {
+        <p>
+            <em>Loading...</em>
+        </p>
+    }
+
+    @if (scoreboards.Any() && !loading)
+    {
+        @foreach (var scoreboard in scoreboards)
+        {
+            <a href="scoreboard/@scoreboard.RowKey" class="scoreboard-item">@scoreboard.RowKey</a>
+        }
+    }
+    @if (!scoreboards.Any() && !loading)
+    {
+        <p>No scoreboards found</p>
+    }
+
+    <button class="btn btn-primary floating-button" data-bs-toggle="modal" data-bs-target="#addScoreboardModal">
+        <i class="fas fa-plus"></i>
+        Add scoreboard
+    </button>
+
+    <div class="modal fade" id="addScoreboardModal" tabindex="-1" aria-labelledby="addScoreboardModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addScoreboardModalLabel">Add a new scoreboard</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input class="form-control" type="text" @bind="scoreboardName" placeholder="Scoreboard name"/>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button @onclick="AddScoreboard" class="btn btn-success">Add Scoreboard</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@code {
+    private string scoreboardName;
+    private IEnumerable<TableEntity>? scoreboards;
+    private bool loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Get score entries
+        scoreboards = await TableService.GetScoreBoards();
+        loading = false;
+    }
+
+    private void AddScoreboard()
+    {
+        TableService.AddScoreBoard(scoreboardName);
+        NavigationManager.NavigateTo($"scoreboard/{scoreboardName}");
+    }
+}

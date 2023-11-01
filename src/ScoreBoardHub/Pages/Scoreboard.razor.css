@@ -1,0 +1,31 @@
+.content-wrapper {
+    width: 750px;
+    margin: 1rem auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    background-color: #fff;
+    border-radius: 0.5rem;
+    gap: .5rem;
+    position: relative;
+}
+
+.fixed-left {
+    position: absolute;
+    left: 1rem;
+}
+
+.score-entry {
+    width: 100%;
+    border-bottom: 1px solid #f5f5f5;
+    margin: 0.5rem 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.score-wrapper {
+    padding: 1rem 0;
+    width: 100%;
+}
