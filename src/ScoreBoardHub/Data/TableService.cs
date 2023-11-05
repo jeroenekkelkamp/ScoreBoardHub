@@ -2,7 +2,7 @@ using Azure;
 using Azure.Data.Tables;
 using ScoreBoardHub.Models;
 
-namespace ScoreBoardHub.Services;
+namespace ScoreBoardHub.Data;
 
 public class TableService
 {
@@ -30,12 +30,25 @@ public class TableService
     public void AddScoreBoardEntry(ScoreBoardEntry entry, string scoreBoardName)
     {
         var tableClient = GetTableClient();
-        var tableEntity = new TableEntity(scoreBoardName, entry.PlayerName)
+        var tableEntity = new TableEntity(scoreBoardName, Guid.NewGuid().ToString())
         {
             { "PlayerName", entry.PlayerName },
             { "Score", entry.Score }
         };
         tableClient.AddEntity(tableEntity);
+    }
+    
+    public void UpdateScoreBoardEntry(ScoreBoardEntry updatedEntry, string scoreBoardName)
+    {
+        var tableClient = GetTableClient();
+    
+        var entity = new TableEntity(scoreBoardName, updatedEntry.RowKey)
+        {
+            { "PlayerName", updatedEntry.PlayerName },
+            { "Score", updatedEntry.Score }
+        };
+
+        tableClient.UpsertEntity(entity);
     }
     
     public async Task<Pageable<TableEntity>> GetScoreBoardEntries(string scoreBoard)
@@ -60,12 +73,10 @@ public class TableService
 
         try
         {
-            // Attempt to create the table
             serviceClient.Create();
         }
         catch (RequestFailedException ex)
         {
-            // Ignore if the table already exists
             if (ex.Status != 409)
             {
                 throw;

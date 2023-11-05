@@ -1,4 +1,4 @@
-using ScoreBoardHub.Services;
+using ScoreBoardHub.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 

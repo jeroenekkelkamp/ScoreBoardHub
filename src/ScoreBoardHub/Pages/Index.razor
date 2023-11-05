@@ -1,12 +1,12 @@
 ﻿@page "/"
 @using Azure.Data.Tables
-@using ScoreBoardHub.Services
+@using ScoreBoardHub.Data
 @inject TableService TableService
 @inject NavigationManager NavigationManager
 
 <PageTitle>Scoreboards</PageTitle>
 <div class="content-wrapper">
-    <h2>Scoreboards</h2>
+    <h1>Scoreboards</h1>
 </div>
 <div class="content-wrapper">
     @if (loading)

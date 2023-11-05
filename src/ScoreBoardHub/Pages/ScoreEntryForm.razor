@@ -1,0 +1,60 @@
+@page "/scoreentryform"
+@using ScoreBoardHub.Models
+@using Azure.Data.Tables
+@using ScoreBoardHub.Data
+@inject TableService TableService
+
+<div class="score-entry-form">
+    <h3>@(IsEditing ? "Edit Score" : "Add Score")</h3>
+    <input type="text" class="form-control" @bind="scoreBoardEntry.PlayerName" placeholder="Player Name" />
+    <input type="number" class="form-control" @bind="scoreBoardEntry.Score" placeholder="Score" min="0" />
+    
+    <div class="button-group">
+        <button class="btn btn-secondary" @onclick="CloseForm">Close</button>
+        <button class="btn btn-success" @onclick="SaveScore">@((IsEditing ? "Update Score" : "Add Score"))</button>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public bool IsEditing { get; set; }
+    [Parameter]
+    public TableEntity ScoreEntry { get; set; }
+    [Parameter]
+    public Action OnScoreSaved { get; set; }
+    [Parameter]
+    public string ScoreboardName { get; set; }
+
+    private ScoreBoardEntry scoreBoardEntry = new ScoreBoardEntry();
+
+    private void CloseForm()
+    {
+        OnScoreSaved.Invoke();
+    }
+    
+    protected override void OnInitialized()
+    {
+        scoreBoardEntry = new ScoreBoardEntry();
+
+        if (IsEditing)
+        {
+            scoreBoardEntry.PlayerName = ScoreEntry.GetString("PlayerName");
+            scoreBoardEntry.Score = ScoreEntry.GetInt32("Score") ?? 0;
+            scoreBoardEntry.RowKey = ScoreEntry.RowKey;
+        }
+    }
+
+    private async Task SaveScore()
+    {
+        if (IsEditing)
+        {
+            TableService.UpdateScoreBoardEntry(scoreBoardEntry, ScoreboardName);
+        }
+        else
+        {
+            TableService.AddScoreBoardEntry(scoreBoardEntry, ScoreboardName);
+        }
+
+        OnScoreSaved.Invoke();
+    }
+}

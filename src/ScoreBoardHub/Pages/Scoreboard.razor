@@ -1,7 +1,6 @@
 @page "/scoreboard/{ScoreboardName}"
 @using Azure.Data.Tables
-@using ScoreBoardHub.Models
-@using ScoreBoardHub.Services
+@using ScoreBoardHub.Data
 @inject TableService TableService
 @inject NavigationManager NavigationManager
 
@@ -12,73 +11,81 @@
     <h1>@ScoreboardName</h1>
 </div>
 <div class="content-wrapper">
-    @if (scoreEntries.Any())
+
+    @if (isEditing || isAdding)
     {
-        var index = 1;
-        <div class="score-wrapper">
-            @foreach (var entry in scoreEntries)
-            {
-                <div class="score-entry">
-                    <div>@index</div>
-                    <div>@entry.GetString("PlayerName")</div>
-                    <div>@entry.GetInt32("Score")</div>
-                </div>
-                index++;
-            }
-        </div>
+        <ScoreEntryForm IsEditing="isEditing" ScoreEntry="selectedScoreEntry" OnScoreSaved="HandleFormClose" ScoreboardName="@ScoreboardName"/>
     }
     else
     {
-        <p>No scores found</p>
-    }
-
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addScoreEntry">
-        <i class="fas fa-plus"></i> Add Score
-    </button>
-
-    <div class="modal fade" id="addScoreEntry" tabindex="-1" aria-labelledby="addScoreEntryLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addScoreEntryLabel">Add a new score</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <input class="form-control" type="text" @bind="scoreBoardEntry.PlayerName" placeholder="Player Name" />
-                    <input class="form-control" type="text" @bind="scoreBoardEntry.Score" placeholder="Score" />
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button @onclick="AddScoreEntry" class="btn btn-success">Add Score</button>
-                </div>
+        @if (scoreEntries.Any())
+        {
+            var index = 1;
+            <div class="score-wrapper">
+                @foreach (var entry in scoreEntries)
+                {
+                    <div class="score-entry" @onclick="() => EditScoreEntry(entry)">
+                        <div class="fixed-text">@index</div>
+                        <div>@entry.GetString("PlayerName")</div>
+                        <div class="fixed-text">@entry.GetInt32("Score")</div>
+                    </div>
+                    index++;
+                }
             </div>
-        </div>
-    </div>
+
+        }
+        else
+        {
+            <p>No scores found</p>
+        }
+        <button class="btn btn-primary" @onclick="OpenAddScoreForm">
+            <i class="fas fa-plus"></i> Add Score
+        </button>
+    }
 </div>
 
 @code {
+
     [Parameter]
     public string ScoreboardName { get; set; }
 
+    private bool isEditing;
+    private bool isAdding;
+    private TableEntity selectedScoreEntry;
+
     private void GoBack()
     {
-        NavigationManager.NavigateTo("/");
+        if (!isEditing && !isAdding) NavigationManager.NavigateTo("/");
+        HandleFormClose();
     }
 
     private IEnumerable<TableEntity> scoreEntries = new List<TableEntity>();
-    private ScoreBoardEntry scoreBoardEntry = new ScoreBoardEntry();
 
     protected override async Task OnInitializedAsync()
     {
         scoreEntries = await TableService.GetScoreBoardEntries(ScoreboardName);
+        scoreEntries = scoreEntries.OrderByDescending(x => x.GetInt32("Score"));
     }
 
-    private async Task AddScoreEntry()
+    private void EditScoreEntry(TableEntity entry)
     {
-        TableService.AddScoreBoardEntry(scoreBoardEntry, ScoreboardName);
-        
-        scoreEntries = await TableService.GetScoreBoardEntries(ScoreboardName);
-
-        scoreBoardEntry = new ScoreBoardEntry();
+        selectedScoreEntry = entry;
+        isEditing = true;
+        isAdding = false;
     }
+
+    private void OpenAddScoreForm()
+    {
+        selectedScoreEntry = null;
+        isEditing = false;
+        isAdding = true;
+    }
+
+    private void HandleFormClose()
+    {
+        isEditing = false;
+        isAdding = false;
+        StateHasChanged();
+    }
+
 }
