@@ -1,6 +1,7 @@
 @page "/scoreboard/{ScoreboardName}"
 @using Azure.Data.Tables
 @using ScoreBoardHub.Data
+@using System.Globalization
 @inject TableService TableService
 @inject NavigationManager NavigationManager
 
@@ -27,7 +28,7 @@
                     <div class="score-entry" @onclick="() => EditScoreEntry(entry)">
                         <div class="fixed-text">@index</div>
                         <div>@entry.GetString("PlayerName")</div>
-                        <div class="fixed-text">@entry.GetInt32("Score")</div>
+                        <div class="fixed-text">@String.Format(CultureInfo.InvariantCulture, "{0:0,0}", entry.GetInt32("Score"))</div>
                     </div>
                     index++;
                 }
