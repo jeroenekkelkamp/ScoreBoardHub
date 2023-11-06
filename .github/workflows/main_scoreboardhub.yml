@@ -22,6 +22,13 @@ jobs:
           dotnet-version: '7.x'
           include-prerelease: true
 
+      - name: Set environment variables
+        run: |
+          echo "AzureStorage__StorageUri=${{ secrets.AZURESTORAGE_STORAGEURI }}" >> $GITHUB_ENV
+          echo "AzureStorage__AccountName=${{ secrets.AZURESTORAGE_ACCOUNTNAME }}" >> $GITHUB_ENV
+          echo "AzureStorage__StorageAccountKey=${{ secrets.AZURESTORAGE_STORAGEACCOUNTKEY }}" >> $GITHUB_ENV
+          echo "AzureStorage__ScoreBoardTableName=${{ secrets.AZURESTORAGE_SCOREBOARDTABLENAME }}" >> $GITHUB_ENV
+          
       - name: Build with dotnet
         run: dotnet build --configuration Release ./src/ScoreBoardHub/ScoreBoardHub.csproj
 
