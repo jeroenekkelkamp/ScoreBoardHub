@@ -28,6 +28,7 @@ jobs:
           echo "AzureStorage__AccountName=${{ secrets.AZURESTORAGE_ACCOUNTNAME }}" >> $GITHUB_ENV
           echo "AzureStorage__StorageAccountKey=${{ secrets.AZURESTORAGE_STORAGEACCOUNTKEY }}" >> $GITHUB_ENV
           echo "AzureStorage__ScoreBoardTableName=${{ secrets.AZURESTORAGE_SCOREBOARDTABLENAME }}" >> $GITHUB_ENV
+          echo "ASPNETCORE_ENVIRONMENT=Development" >> $GITHUB_ENV
           
       - name: Build with dotnet
         run: dotnet build --configuration Release ./src/ScoreBoardHub/ScoreBoardHub.csproj
