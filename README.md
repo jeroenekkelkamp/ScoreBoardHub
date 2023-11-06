@@ -5,5 +5,7 @@ ScoreBoardHub is a simple .NET Blazor application designed for creating scoreboa
 ## Features
 
 ✨ Create and manage multiple scoreboards for different competitions.
+
 📊 Add and edit score entries for each competition.
+
 🌐 User-friendly web interface.
