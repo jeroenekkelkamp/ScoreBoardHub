@@ -73,5 +73,6 @@ a, .btn-link {
     width: 100vw;
     left: 0;
     top: 0;
-    background-repeat: no-repeat;
+    background-repeat: no-repeat; 
+    background-size: 100vh 100vw;
 }
