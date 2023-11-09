@@ -93,11 +93,28 @@ public class TableService
 
         return serviceClient;
     }
+
+    public void RemoveScoreBoardEntry(string rowKey, string scoreBoardName)
+    {
+        var scoreBoardEntry = GetScoreBoardEntryByRowKey(rowKey, scoreBoardName);
+        if (scoreBoardEntry is null) return;
+        
+        var tableClient = GetTableClient();
+        tableClient.DeleteEntity(scoreBoardEntry.PartitionKey, scoreBoardEntry.RowKey);
+        
+    }
     
     private TableEntity? GetScoreBoardEntryByPlayerName(string playerName, string scoreBoardName)
     {
         var tableClient = GetTableClient();
         var scoreboardEntries = tableClient.Query<TableEntity>(filter: $"PartitionKey eq '{scoreBoardName}' and PlayerName eq '{playerName}'");
+        return scoreboardEntries.FirstOrDefault();
+    }
+    
+    private TableEntity GetScoreBoardEntryByRowKey(string rowKey, string scoreBoardName)
+    {
+        var tableClient = GetTableClient();
+        var scoreboardEntries = tableClient.Query<TableEntity>(filter: $"PartitionKey eq '{scoreBoardName}' and RowKey eq '{rowKey}'");
         return scoreboardEntries.FirstOrDefault();
     }
 }

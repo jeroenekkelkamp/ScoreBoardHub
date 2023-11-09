@@ -6,12 +6,38 @@
 
 <div class="score-entry-form">
     <h3>@(IsEditing ? "Edit Score" : "Add Score")</h3>
+    @if (IsEditing)
+    {
+        <button class="fixed-top-right" @onclick="ShowValidationPopup"><i class="fa-solid fa-trash-can"></i></button>
+    }
     <input type="text" class="form-control" @bind="scoreBoardEntry.PlayerName" placeholder="Player Name" />
     <input type="number" class="form-control" @bind="scoreBoardEntry.Score" placeholder="Score" min="0" />
     
     <div class="button-group">
         <button class="btn btn-secondary" @onclick="CloseForm">Close</button>
         <button class="btn btn-success" @onclick="SaveScore">@((IsEditing ? "Update Score" : "Add Score"))</button>
+    </div>
+</div>
+
+<div class="modal-backdrop fade @(isValidationPopupVisible ? "show" : "")"></div>
+
+<div class="modal fade @(isValidationPopupVisible ? "show d-block" : "")" tabindex="-1" role="dialog" aria-labelledby="validationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="validationModalLabel">Confirmation</h5>
+                <button type="button" class="close" @onclick="HideValidationPopup">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this entry?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="HideValidationPopup">Cancel</button>
+                <button type="button" class="btn btn-danger" @onclick="RemoveEntry">Delete</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -56,5 +82,24 @@
         }
 
         OnScoreSaved.Invoke();
+    }
+    
+    private bool isValidationPopupVisible = false;
+
+    private void ShowValidationPopup()
+    {
+        isValidationPopupVisible = true;
+    }
+
+    private void HideValidationPopup()
+    {
+        isValidationPopupVisible = false;
+    }
+
+    private void RemoveEntry()
+    {
+        TableService.RemoveScoreBoardEntry(scoreBoardEntry.RowKey, ScoreboardName);
+        OnScoreSaved.Invoke();
+        HideValidationPopup();
     }
 }
