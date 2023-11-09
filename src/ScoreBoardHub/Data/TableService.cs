@@ -29,11 +29,19 @@ public class TableService
 
     public void AddScoreBoardEntry(ScoreBoardEntry entry, string scoreBoardName)
     {
+        var existingRecord = GetScoreBoardEntryByPlayerName(entry.PlayerName, scoreBoardName);
+        if (existingRecord != null)
+        {
+            entry.RowKey = existingRecord.RowKey;
+            UpdateScoreBoardEntry(entry, scoreBoardName);
+            return;
+        }
+        
         var tableClient = GetTableClient();
         var tableEntity = new TableEntity(scoreBoardName, Guid.NewGuid().ToString())
         {
             { "PlayerName", entry.PlayerName },
-            { "Score", entry.Score }
+            { "Score", entry.Score < 0 ? 0 : entry.Score }
         };
         tableClient.AddEntity(tableEntity);
     }
@@ -45,7 +53,7 @@ public class TableService
         var entity = new TableEntity(scoreBoardName, updatedEntry.RowKey)
         {
             { "PlayerName", updatedEntry.PlayerName },
-            { "Score", updatedEntry.Score }
+            { "Score", updatedEntry.Score < 0 ? 0 : updatedEntry.Score }
         };
 
         tableClient.UpsertEntity(entity);
@@ -84,5 +92,29 @@ public class TableService
         }
 
         return serviceClient;
+    }
+
+    public void RemoveScoreBoardEntry(string rowKey, string scoreBoardName)
+    {
+        var scoreBoardEntry = GetScoreBoardEntryByRowKey(rowKey, scoreBoardName);
+        if (scoreBoardEntry is null) return;
+        
+        var tableClient = GetTableClient();
+        tableClient.DeleteEntity(scoreBoardEntry.PartitionKey, scoreBoardEntry.RowKey);
+        
+    }
+    
+    private TableEntity? GetScoreBoardEntryByPlayerName(string playerName, string scoreBoardName)
+    {
+        var tableClient = GetTableClient();
+        var scoreboardEntries = tableClient.Query<TableEntity>(filter: $"PartitionKey eq '{scoreBoardName}' and PlayerName eq '{playerName}'");
+        return scoreboardEntries.FirstOrDefault();
+    }
+    
+    private TableEntity GetScoreBoardEntryByRowKey(string rowKey, string scoreBoardName)
+    {
+        var tableClient = GetTableClient();
+        var scoreboardEntries = tableClient.Query<TableEntity>(filter: $"PartitionKey eq '{scoreBoardName}' and RowKey eq '{rowKey}'");
+        return scoreboardEntries.FirstOrDefault();
     }
 }
