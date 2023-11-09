@@ -1,6 +1,7 @@
 using Azure;
 using Azure.Data.Tables;
 using ScoreBoardHub.Models;
+using ScoreBoardHub.Pages;
 
 namespace ScoreBoardHub.Data;
 
@@ -20,10 +21,14 @@ public class TableService
         return scoreboards;
     }
 
-    public void AddScoreBoard(string scoreboardName)
+    public void AddScoreBoard(string scoreboardName, string subtitle, string imageUrl)
     {
         var tableClient = GetTableClient();
-        var tableEntity = new TableEntity("Scoreboard", scoreboardName);
+        var tableEntity = new TableEntity("Scoreboard", scoreboardName)
+        {
+            { "Subtitle", subtitle },
+            { "ImageUrl", imageUrl }
+        };
         tableClient.AddEntity(tableEntity);
     }
 
@@ -64,6 +69,13 @@ public class TableService
         var tableClient = GetTableClient();
         var scoreboardEntries = tableClient.Query<TableEntity>(filter: $"PartitionKey eq '{scoreBoard}'");
         return scoreboardEntries;
+    }
+        
+    public async Task<TableEntity> GetScoreBoardByName(string scoreBoard)
+    {
+        var tableClient = GetTableClient();
+        var scoreboard = tableClient.Query<TableEntity>(filter: $"PartitionKey eq 'Scoreboard' and RowKey eq '{scoreBoard}'");
+        return scoreboard.First();
     }
     
     private TableClient GetTableClient()

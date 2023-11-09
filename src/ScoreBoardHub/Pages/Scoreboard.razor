@@ -5,45 +5,48 @@
 @inject TableService TableService
 @inject NavigationManager NavigationManager
 
-<div class="content-wrapper">
-    <button @onclick="GoBack" class="btn fixed-left">
-        <i class="fas fa-arrow-left"></i> Back
-    </button>
-    <h1>@ScoreboardName</h1>
-</div>
-<div class="content-wrapper">
+<div class="scoreboard" style="background-image: url(@scoreboard.GetString("ImageUrl"));">
+    <div class="content-wrapper">
+        <button @onclick="GoBack" class="btn fixed-left">
+            <i class="fas fa-arrow-left"></i> Back
+        </button>
+        <h1>@ScoreboardName</h1>
+        <p>@scoreboard.GetString("Subtitle")</p>
+    </div>
+    <div class="content-wrapper">
 
-    @if (isEditing || isAdding)
-    {
-        <ScoreEntryForm IsEditing="isEditing" ScoreEntry="selectedScoreEntry" OnScoreSaved="HandleFormClose" ScoreboardName="@ScoreboardName"/>
-    }
-    else
-    {
-        @if (scoreEntries.Any())
+        @if (isEditing || isAdding)
         {
-            var index = 1;
-            <div class="score-wrapper">
-                @foreach (var entry in scoreEntries)
-                {
-                    <div class="score-entry" @onclick="() => EditScoreEntry(entry)">
-                        <div class="fixed-text">@index</div>
-                        <div>@entry.GetString("PlayerName")</div>
-                        <div class="fixed-text">@String.Format(CultureInfo.InvariantCulture, "{0:0,0}", entry.GetInt32("Score"))</div>
-                    </div>
-                    index++;
-                }
-            </div>
-
+            <ScoreEntryForm IsEditing="isEditing" ScoreEntry="selectedScoreEntry" OnScoreSaved="HandleFormClose" ScoreboardName="@ScoreboardName"/>
         }
         else
         {
-            <p>No scores found</p>
+            @if (scoreEntries.Any())
+            {
+                var index = 1;
+                <div class="score-wrapper">
+                    @foreach (var entry in scoreEntries)
+                    {
+                        <div class="score-entry" @onclick="() => EditScoreEntry(entry)">
+                            <div class="fixed-text">@index</div>
+                            <div>@entry.GetString("PlayerName")</div>
+                            <div class="fixed-text">@String.Format(CultureInfo.InvariantCulture, "{0:0,0}", entry.GetInt32("Score"))</div>
+                        </div>
+                        index++;
+                    }
+                </div>
+
+            }
+            else
+            {
+                <p>No scores found</p>
+            }
+            <p>Click on a score entry to edit the score, or:</p>
+            <button class="btn btn-primary" @onclick="OpenAddScoreForm">
+                <i class="fas fa-plus"></i> Add Score
+            </button>
         }
-        <p>Click on a score entry to edit the score, or:</p>
-        <button class="btn btn-primary" @onclick="OpenAddScoreForm">
-            <i class="fas fa-plus"></i> Add Score
-        </button>
-    }
+    </div>
 </div>
 
 @code {
@@ -62,9 +65,11 @@
     }
 
     private IEnumerable<TableEntity> scoreEntries = new List<TableEntity>();
+    private TableEntity scoreboard = new();
 
     protected override async Task OnInitializedAsync()
     {
+        scoreboard = await TableService.GetScoreBoardByName(ScoreboardName);
         scoreEntries = await TableService.GetScoreBoardEntries(ScoreboardName);
         scoreEntries = scoreEntries.OrderByDescending(x => x.GetInt32("Score"));
     }
