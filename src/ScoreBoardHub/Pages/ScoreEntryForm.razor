@@ -5,18 +5,27 @@
 @inject TableService TableService
 
 <div class="score-entry-form">
-    <h3>@(IsEditing ? "Edit Score" : "Add Score")</h3>
-    @if (IsEditing)
-    {
-        <button class="fixed-top-right" @onclick="ShowValidationPopup"><i class="fa-solid fa-trash-can"></i></button>
-    }
-    <input type="text" class="form-control" @bind="scoreBoardEntry.PlayerName" placeholder="Player Name" />
-    <input type="number" class="form-control" @bind="scoreBoardEntry.Score" placeholder="Score" min="0" />
-    
-    <div class="button-group">
-        <button class="btn btn-secondary" @onclick="CloseForm">Close</button>
-        <button class="btn btn-success" @onclick="SaveScore">@((IsEditing ? "Update Score" : "Add Score"))</button>
-    </div>
+    <EditForm Model="@scoreBoardEntry" OnValidSubmit="@SaveScore">
+        <DataAnnotationsValidator />
+        <h3>@(IsEditing ? "Edit Score" : "Add Score")</h3>
+        @if (IsEditing)
+        {
+            <button type="button" class="fixed-top-right" @onclick="ShowValidationPopup"><i class="fa-solid fa-trash-can"></i></button>
+        }
+        <div>
+            <InputText Value="scoreBoardEntry.PlayerName" placeholder="Player Name" style="width:100%" />
+            <ValidationMessage For="() => scoreBoardEntry.PlayerName" />
+        </div>
+        <div>
+            <InputNumber Value="scoreBoardEntry.Score" placeholder="Player Score" style="width:100%" min="0" />
+            <ValidationMessage For="() => scoreBoardEntry.Score" />
+        </div>
+
+        <div class="button-group">
+            <button type="button" class="btn btn-secondary" @onclick="CloseForm">Close</button>
+            <button type="submit" class="btn btn-success">@((IsEditing ? "Update Score" : "Add Score"))</button>
+        </div>
+    </EditForm>
 </div>
 
 <div class="modal-backdrop fade @(isValidationPopupVisible ? "show" : "")"></div>
@@ -51,29 +60,30 @@
     [Parameter]
     public string ScoreboardName { get; set; }
 
-    private ScoreBoardEntry scoreBoardEntry = new ScoreBoardEntry();
+    private ScoreBoardEntry scoreBoardEntry { get; set; } = new ScoreBoardEntry();
 
     private void CloseForm()
     {
         OnScoreSaved.Invoke();
     }
-    
+
     protected override void OnInitialized()
     {
         scoreBoardEntry = new ScoreBoardEntry();
 
         if (IsEditing)
         {
-            scoreBoardEntry.PlayerName = ScoreEntry.GetString("PlayerName");
-            scoreBoardEntry.Score = ScoreEntry.GetInt32("Score") ?? 0;
-            scoreBoardEntry.RowKey = ScoreEntry.RowKey;
+            scoreBoardEntry.PlayerName = ScoreEntry!.GetString("PlayerName");
+            scoreBoardEntry.Score = ScoreEntry!.GetInt32("Score") ?? 0;
+            scoreBoardEntry.RowKey = ScoreEntry!.RowKey;
         }
     }
 
-    private async Task SaveScore()
+    private void SaveScore()
     {
         if (IsEditing)
         {
+
             TableService.UpdateScoreBoardEntry(scoreBoardEntry, ScoreboardName);
         }
         else
@@ -83,7 +93,7 @@
 
         OnScoreSaved.Invoke();
     }
-    
+
     private bool isValidationPopupVisible = false;
 
     private void ShowValidationPopup()

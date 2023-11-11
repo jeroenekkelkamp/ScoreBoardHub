@@ -14,10 +14,9 @@
         <p>@scoreboard.GetString("Subtitle")</p>
     </div>
     <div class="content-wrapper">
-
         @if (isEditing || isAdding)
         {
-            <ScoreEntryForm IsEditing="isEditing" ScoreEntry="selectedScoreEntry" OnScoreSaved="HandleFormClose" ScoreboardName="@ScoreboardName"/>
+            <ScoreEntryForm IsEditing="isEditing" ScoreEntry="selectedScoreEntry" OnScoreSaved="HandleFormClose" ScoreboardName="@ScoreboardName" />
         }
         else
         {
@@ -28,7 +27,7 @@
                     @foreach (var entry in scoreEntries)
                     {
                         <div class="score-entry" @onclick="() => EditScoreEntry(entry)">
-                            <div class="fixed-text">@index</div>
+                            <div>@index</div>
                             <div>@entry.GetString("PlayerName")</div>
                             <div class="fixed-text">@String.Format(CultureInfo.InvariantCulture, "{0:0,0}", entry.GetInt32("Score"))</div>
                         </div>
@@ -56,7 +55,9 @@
 
     private bool isEditing;
     private bool isAdding;
+    private TableEntity scoreboard = new();
     private TableEntity selectedScoreEntry;
+    private IEnumerable<TableEntity> scoreEntries = new List<TableEntity>();
 
     private void GoBack()
     {
@@ -64,14 +65,11 @@
         HandleFormClose();
     }
 
-    private IEnumerable<TableEntity> scoreEntries = new List<TableEntity>();
-    private TableEntity scoreboard = new();
-
     protected override async Task OnInitializedAsync()
     {
         scoreboard = await TableService.GetScoreBoardByName(ScoreboardName);
-        scoreEntries = await TableService.GetScoreBoardEntries(ScoreboardName);
-        scoreEntries = scoreEntries.OrderByDescending(x => x.GetInt32("Score"));
+        scoreEntries = (await TableService.GetScoreBoardEntries(ScoreboardName))
+                        .OrderByDescending(x => x.GetInt32("Score"));
     }
 
     private void EditScoreEntry(TableEntity entry)
@@ -94,5 +92,4 @@
         isAdding = false;
         StateHasChanged();
     }
-
 }
