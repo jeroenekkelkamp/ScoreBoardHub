@@ -1,9 +1,9 @@
 ﻿@page "/"
 @using Azure.Data.Tables
+@using ScoreBoardHub.Components
 @using ScoreBoardHub.Data
 @using System.ComponentModel.DataAnnotations
 @inject TableService TableService
-@inject NavigationManager NavigationManager
 
 <PageTitle>Scoreboards</PageTitle>
 <div class="content-wrapper">
@@ -17,49 +17,22 @@
         </p>
     }
 
-    @if (scoreboards.Any() && !loading)
+    @if (!loading && scoreboards.Any())
     {
         @foreach (var scoreboard in scoreboards)
         {
             <a href="scoreboard/@scoreboard.RowKey" class="scoreboard-item">@scoreboard.RowKey</a>
         }
     }
-    @if (!scoreboards.Any() && !loading)
+    @if (!loading && !scoreboards.Any())
     {
         <p>No scoreboards found</p>
     }
-
-    <button class="btn btn-primary floating-button" data-bs-toggle="modal" data-bs-target="#addScoreboardModal">
-        <i class="fas fa-plus"></i>
-        Add scoreboard
-    </button>
-
-    <div class="modal fade" id="addScoreboardModal" tabindex="-1" aria-labelledby="addScoreboardModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addScoreboardModalLabel">Add a new scoreboard</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <input class="form-control" type="text" @bind="scoreboardName" placeholder="Scoreboard name*"/><br/>
-                    <input class="form-control" type="text" @bind="scoreboardSubtitle" placeholder="Scoreboard subtitle (e.g. price)*"/><br/>
-                    <input class="form-control" type="text" @bind="scoreboardImageUrl" placeholder="Scoreboard image URL*"/>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button @onclick="AddScoreboard" class="btn btn-success">Add Scoreboard</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    
+    <NewScoreboardModal />
 </div>
 
 @code {
-    private string scoreboardName;
-    private string scoreboardSubtitle;
-    private string scoreboardImageUrl;
     private IEnumerable<TableEntity>? scoreboards;
     private bool loading = true;
 
@@ -68,11 +41,5 @@
         // Get score entries
         scoreboards = await TableService.GetScoreBoards();
         loading = false;
-    }
-
-    private void AddScoreboard()
-    {
-        TableService.AddScoreBoard(scoreboardName, scoreboardSubtitle, scoreboardImageUrl);
-        NavigationManager.NavigateTo($"scoreboard/{scoreboardName}");
     }
 }

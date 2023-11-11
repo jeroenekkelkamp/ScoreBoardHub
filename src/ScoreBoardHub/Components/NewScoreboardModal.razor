@@ -1,0 +1,48 @@
+﻿@using ScoreBoardHub.Data;
+@using ScoreBoardHub.Models;
+@inject NavigationManager NavigationManager
+@inject TableService TableService
+
+<button class="btn btn-primary floating-button" data-bs-toggle="modal" data-bs-target="#addScoreboardModal">
+    <i class="fas fa-plus"></i>
+    Add scoreboard
+</button>
+
+<div class="modal fade" id="addScoreboardModal" tabindex="-1" aria-labelledby="addScoreboardModalLabel" aria-hidden="true">
+    <EditForm Model="@_scoreBoard" OnValidSubmit="AddScoreboard">
+        <DataAnnotationsValidator />
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addScoreboardModalLabel">Add a new scoreboard</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <InputText class="input-field" @bind-Value="_scoreBoard.Name" placeholder="Scoreboard name*" style="width:100%;" />
+                    <ValidationMessage For="() => _scoreBoard.Name" /><br />
+                    <InputText class="input-field" @bind-Value="_scoreBoard.Subtitle" placeholder="Scoreboard subtitle (e.g. price)*" style="width:100%;" />
+                    <ValidationMessage For="() => _scoreBoard.Subtitle" /><br />
+                    <InputText class="input-field" @bind-Value="_scoreBoard.BackgroundImageUrl" placeholder="Scoreboard image URL*" style="width:100%;" />
+                    <ValidationMessage For="() => _scoreBoard.BackgroundImageUrl" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-success">Add Scoreboard</button>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter]
+    public Action OnValidSubmit { get; set; }
+
+    private ScoreBoard _scoreBoard { get; set; } = new();
+
+    private void AddScoreboard()
+    {
+        TableService.AddScoreBoard(_scoreBoard.Name, _scoreBoard.Subtitle, _scoreBoard.BackgroundImageUrl);
+        NavigationManager.NavigateTo($"scoreboard/{_scoreBoard.Name}");
+    }
+}
