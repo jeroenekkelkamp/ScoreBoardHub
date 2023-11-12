@@ -1,0 +1,55 @@
+﻿@using Azure.Data.Tables;
+@using System.Globalization;
+
+@if (ScoreEntries.Any())
+{
+    var index = 1 + (currentPage * PageItemCount);
+
+    <div class="score-wrapper">
+        <div class="score-wrapper">
+            @foreach (var entry in ScoreEntries.Skip(currentPage * PageItemCount).Take(PageItemCount))
+            {
+                <div class="score-entry" @onclick="() => OnScoreEntrySelected.InvokeAsync(entry)">
+                    <div>@index</div>
+                    <div>@entry.GetString("PlayerName")</div>
+                    <div class="fixed-text">@String.Format(CultureInfo.InvariantCulture, "{0:0,0}", entry.GetInt32("Score"))</div>
+                </div>
+                index++;
+            }
+        </div>
+        <div class="page-selection-wrapper">
+            @for(int pageIndex = 0; pageIndex <= scoreEntryCount / (PageItemCount + 1); pageIndex++)
+            {
+                var buttonPage = pageIndex;
+                <button class="page-button" @onclick="() => HandlePageClick(buttonPage)">@(buttonPage + 1)</button>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <p>No scores found</p>
+}
+
+@code {
+    [CascadingParameter]
+    public IEnumerable<TableEntity> ScoreEntries { get; set; }
+    [Parameter]
+    public int PageItemCount { get; set; } = 10;
+    [Parameter]
+    public EventCallback<TableEntity> OnScoreEntrySelected { get; set; }
+
+    private int currentPage = 0;
+    private int scoreEntryCount;
+
+    protected override void OnParametersSet()
+    {
+        scoreEntryCount = ScoreEntries.Count();
+        base.OnParametersSet();
+    }
+
+    protected void HandlePageClick(int nextPage)
+    {
+        currentPage = nextPage;
+    }
+}
