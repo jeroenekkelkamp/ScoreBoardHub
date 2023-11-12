@@ -13,11 +13,11 @@
             <button type="button" class="fixed-top-right" @onclick="ShowValidationPopup"><i class="fa-solid fa-trash-can"></i></button>
         }
         <div>
-            <InputText Value="scoreBoardEntry.PlayerName" placeholder="Player Name" style="width:100%" />
+            <InputText @bind-Value="scoreBoardEntry.PlayerName" placeholder="Player Name" style="width:100%" />
             <ValidationMessage For="() => scoreBoardEntry.PlayerName" />
         </div>
         <div>
-            <InputNumber Value="scoreBoardEntry.Score" placeholder="Player Score" style="width:100%" min="0" />
+            <InputNumber @bind-Value="scoreBoardEntry.Score" placeholder="Player Score" style="width:100%" min="0" />
             <ValidationMessage For="() => scoreBoardEntry.Score" />
         </div>
 
@@ -56,7 +56,7 @@
     [Parameter]
     public TableEntity ScoreEntry { get; set; }
     [Parameter]
-    public Action OnScoreSaved { get; set; }
+    public EventCallback<TableEntity> OnScoreSaved { get; set; }
     [Parameter]
     public string ScoreboardName { get; set; }
 
@@ -64,7 +64,7 @@
 
     private void CloseForm()
     {
-        OnScoreSaved.Invoke();
+        OnScoreSaved.InvokeAsync();
     }
 
     protected override void OnInitialized()
@@ -91,7 +91,7 @@
             TableService.AddScoreBoardEntry(scoreBoardEntry, ScoreboardName);
         }
 
-        OnScoreSaved.Invoke();
+        OnScoreSaved.InvokeAsync(ScoreEntry);
     }
 
     private bool isValidationPopupVisible = false;
@@ -109,7 +109,7 @@
     private void RemoveEntry()
     {
         TableService.RemoveScoreBoardEntry(scoreBoardEntry.RowKey, ScoreboardName);
-        OnScoreSaved.Invoke();
+        OnScoreSaved.InvokeAsync(ScoreEntry);
         HideValidationPopup();
     }
 }

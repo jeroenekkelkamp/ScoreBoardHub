@@ -1,5 +1,6 @@
 @page "/scoreboard/{ScoreboardName}"
 @using Azure.Data.Tables
+@using ScoreBoardHub.Components
 @using ScoreBoardHub.Data
 @using System.Globalization
 @inject TableService TableService
@@ -16,43 +17,33 @@
     <div class="content-wrapper">
         @if (isEditing || isAdding)
         {
-            <ScoreEntryForm IsEditing="isEditing" ScoreEntry="selectedScoreEntry" OnScoreSaved="HandleFormClose" ScoreboardName="@ScoreboardName" />
+            <ScoreEntryForm IsEditing="isEditing" ScoreEntry="selectedScoreEntry" OnScoreSaved="HandleFormClose" ScoreboardName="@ScoreboardName"/>
         }
         else
         {
-            @if (scoreEntries.Any())
-            {
-                var index = 1;
-                <div class="score-wrapper">
-                    @foreach (var entry in scoreEntries)
-                    {
-                        <div class="score-entry" @onclick="() => EditScoreEntry(entry)">
-                            <div>@index</div>
-                            <div>@entry.GetString("PlayerName")</div>
-                            <div class="fixed-text">@String.Format(CultureInfo.InvariantCulture, "{0:0,0}", entry.GetInt32("Score"))</div>
-                        </div>
-                        index++;
-                    }
+            <div class="controls">
+                <div class="add-score-control">
+                    <button class="btn btn-primary" @onclick="OpenAddScoreForm">
+                        <i class="fas fa-plus"></i> Add Score
+                    </button>
                 </div>
-
-            }
-            else
-            {
-                <p>No scores found</p>
-            }
-            <p>Click on a score entry to edit the score, or:</p>
-            <button class="btn btn-primary" @onclick="OpenAddScoreForm">
-                <i class="fas fa-plus"></i> Add Score
-            </button>
+                <div class="amount-selector">
+                    <label>Scores per page:</label>
+                    <InputNumber @bind-Value="scoresPerPage" />
+                </div>
+            </div>
+            <CascadingValue Value="scoreEntries">
+                <PaginatedScoreList OnScoreEntrySelected="EditScoreEntry" PageItemCount="scoresPerPage"/>
+            </CascadingValue>
         }
     </div>
 </div>
 
 @code {
-
     [Parameter]
     public string ScoreboardName { get; set; }
 
+    private int scoresPerPage = 10;
     private bool isEditing;
     private bool isAdding;
     private TableEntity scoreboard = new();
@@ -81,7 +72,7 @@
 
     private void OpenAddScoreForm()
     {
-        selectedScoreEntry = null;
+        selectedScoreEntry = new();
         isEditing = false;
         isAdding = true;
     }
@@ -90,6 +81,5 @@
     {
         isEditing = false;
         isAdding = false;
-        StateHasChanged();
     }
 }
